@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF/DOCX Summarizer & Q&A</title>
+  <style>
+    body, input, select, button, label, .result-box {
+      font-family: Arial, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .container {
+      background: #fff;
+      box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+      border-radius: 8px;
+      padding: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    input[type="file"],
+    select,
+    input[type="text"],
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="file"]:focus,
+    select:focus,
+    input[type="text"]:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .result-box {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 6px;
+      height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #222;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PDF/DOCX Summarizer & Q&A</h1>
+  </header>
+
+  <div class="container">
+    <div class="section">
+      <label for="fileInput">Upload File (PDF or DOCX):</label>
+      <input type="file" id="fileInput" accept=".pdf,.docx" />
+    </div>
+
+    <div class="section">
+      <label for="modeSelect">Choose Mode:</label>
+      <select id="modeSelect">
+        <option value="summary">Summary</option>
+        <option value="qa">Q&A</option>
+      </select>
+    </div>
+
+    <div class="section" id="querySection" style="display:none;">
+      <label for="queryInput">Enter your question:</label>
+      <input type="text" id="queryInput" placeholder="Ask something about the document..." />
+    </div>
+
+    <button id="uploadBtn">Upload & Process</button>
+
+    <div class="section">
+      <label>Result:</label>
+      <div class="result-box" id="resultBox">Results will appear here...</div>
+    </div>
+  </div>
+
+  <script>
+    const modeSelect = document.getElementById('modeSelect');
+    const querySection = document.getElementById('querySection');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
+    const queryInput = document.getElementById('queryInput');
+    const resultBox = document.getElementById('resultBox');
+
+    modeSelect.addEventListener('change', () => {
+      if (modeSelect.value === 'qa') {
+        querySection.style.display = 'block';
+      } else {
+        querySection.style.display = 'none';
+      }
+    });
+
+    uploadBtn.addEventListener('click', async () => {
+    if (!fileInput.files.length) {
+      alert('Please select a file to upload.');
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const mode = modeSelect.value;
+    const query = mode === 'qa' ? queryInput.value.trim() : "";
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('mode', mode);
+    formData.append('query', query);
+
+    resultBox.textContent = "Processing... Please wait.";
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Something went wrong');
+      }
+
+      const data = await response.json();
+
+      const cleanResult = (data.result || '').replace(/\*+/g, '').trim();
+
+      resultBox.textContent = cleanResult || 'No result returned.';
+    } catch (error) {
+      resultBox.textContent = `Error: ${error.message}`;
+    }
+  });
+  </script>
+</body>
+</html>
