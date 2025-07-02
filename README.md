@@ -6,7 +6,7 @@ An application built using NodeJS, Express and Google Gemini that allows users t
 
 ## Features
 
-- **Multiple PDF Upload**  
+- **PDF or Word Documents Upload**  
   Upload and process single or multiple PDF files simultaneously.
 
 - **Conversational Query Interface**  
