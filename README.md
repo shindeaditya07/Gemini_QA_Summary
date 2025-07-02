@@ -1,6 +1,6 @@
 # PDF_QA_Summary_Gemini
 
-A Streamlit-based application that allows users to upload PDF documents and interactively query and summarize their contents using Google’s Gemini AI models.
+An application built using NodeJS, Express and Google Gemini that allows users to upload PDF documents and interactively query and summarize their contents using Google’s Gemini AI models.
 
 ---
 
